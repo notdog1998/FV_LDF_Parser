@@ -1,0 +1,149 @@
+start: ldf
+
+ldf: (header_lin_description_file | header_protocol_version | header_language_version | header_speed | header_channel | header_file_revision | header_sig_byte_order_big_endian | header_sig_byte_order_little_endian | nodes | node_compositions | signals | diagnostic_signals | diagnostic_addresses | frames | sporadic_frames | event_triggered_frames | diagnostic_frames | node_attributes | schedule_tables | signal_groups | signal_encoding_types | signal_representations)*
+
+ldf_identifier: CNAME
+ldf_version: LIN_VERSION | ISO_VERSION | J2602_VERSION
+ldf_integer: C_INT
+ldf_float: C_FLOAT
+ldf_channel_name: ESCAPED_STRING
+
+// LIN 2.1 Specification, section 9.2.1
+header_lin_description_file: "LIN_description_file" ";"
+header_protocol_version: "LIN_protocol_version" "=" "\"" ldf_version "\"" ";"
+header_language_version: "LIN_language_version" "=" "\"" ldf_version "\"" ";"
+header_speed: "LIN_speed" "=" ldf_float "kbps" ";"
+header_channel: "Channel_name" "=" ldf_channel_name ";"
+
+// ISO1798 Specification
+header_file_revision: "LDF_file_revision" "=" ESCAPED_STRING ";"
+header_sig_byte_order_big_endian: "LIN_sig_byte_order_big_endian" ";"
+header_sig_byte_order_little_endian: "LIN_sig_byte_order_little_endian" ";"
+
+// LIN 2.1 Specification, section 9.2.2
+// SAE J2602-3_201001, SECTION 7.2
+nodes: "Nodes" "{" nodes_master? nodes_slaves? "}"
+nodes_master: "Master" ":" ldf_identifier "," ldf_float "ms" "," ldf_float "ms" ("," ldf_integer "bits" "," ldf_float "%")? ";"
+nodes_slaves: "Slaves" ":" ldf_identifier ("," ldf_identifier)* ";"
+
+// LIN 2.1 Specification, section 9.2.2.3
+node_compositions: "composite" "{" (node_compositions_configuration+) "}"
+node_compositions_configuration: "configuration" ldf_identifier "{" (node_compositions_composite+) "}"
+node_compositions_composite: ldf_identifier "{" ldf_identifier ("," ldf_identifier)* "}"
+
+// LIN 2.1 Specification, section 9.2.3
+signals: "Signals" "{" (signal_definition)+ "}"
+signal_definition: ldf_identifier ":" ldf_integer "," signal_default_value "," ldf_identifier ("," ldf_identifier)* ";"
+signal_default_value: signal_default_value_array | signal_default_value_single
+signal_default_value_single: ldf_integer
+signal_default_value_array: "{" ldf_integer ("," ldf_integer)* "}"
+
+// LIN 2.1 Specification, section 9.2.3.2
+diagnostic_signals: "Diagnostic_signals" "{" (diagnostic_signal_definition+) "}"
+diagnostic_signal_definition: ldf_identifier ":" ldf_integer "," signal_default_value ";"
+
+// LIN 2.1 Specification, section 9.2.4
+frames: "Frames" "{" [frame_definition]+ "}"
+frame_definition : ldf_identifier  ":" ldf_integer "," ldf_identifier ("," ldf_integer)? "{" frame_signals "}"
+frame_signals: (frame_signal+)
+frame_signal: ldf_identifier "," ldf_integer ";" 
+
+// LIN 2.1 Specification, section 9.2.4.2
+sporadic_frames: "Sporadic_frames" "{" (sporadic_frame_definition+) "}"
+sporadic_frame_definition: ldf_identifier ":" ldf_identifier ("," ldf_identifier)* ";"
+
+// LIN 2.1 Specification, section 9.2.4.3
+event_triggered_frames: "Event_triggered_frames" "{" (event_triggered_frame_definition+) "}"
+event_triggered_frame_definition: ldf_identifier ":" (ldf_identifier ",")? ldf_integer event_triggered_frame_definition_frames ";"
+event_triggered_frame_definition_frames: ("," ldf_identifier)+
+
+// LIN 2.1 Specification, section 9.2.4.4
+diagnostic_frames: "Diagnostic_frames" "{" (diagnostic_frame_definition)+ "}"
+diagnostic_frame_definition: ldf_identifier ":" ldf_integer "{" diagnostic_frame_signals "}"
+diagnostic_frame_signals: (frame_signal+)
+
+// LIN 1.3 Specification, section 7.5
+diagnostic_addresses: "Diagnostic_addresses" "{" (diagnostic_address)* "}"
+diagnostic_address: ldf_identifier ":" ldf_integer ";"
+
+// LIN 2.1 Specification, section 9.2.2.2
+// response_tolerance: SAE J2602_1_201001, section 7.2.1
+node_attributes: "Node_attributes" "{" (node_definition*) "}"
+node_definition: ldf_identifier "{" (node_definition_protocol | node_definition_configured_nad | node_definition_initial_nad | node_definition_product_id | node_definition_response_error | node_definition_fault_state_signals | node_definition_p2_min | node_definition_st_min | node_definition_n_as_timeout | node_definition_n_cr_timeout | node_definition_configurable_frames | node_definition_response_tolerance | node_definition_wakeup_time | node_definition_poweron_time)* "}"
+node_definition_protocol: "LIN_protocol" "=" (["\"" ldf_version "\""] | ldf_version) ";"
+node_definition_configured_nad: "configured_NAD" "=" ldf_integer ";"
+node_definition_initial_nad: "initial_NAD" "=" ldf_integer ";"
+node_definition_product_id: "product_id" "=" ldf_integer "," ldf_integer ("," ldf_integer)? ";"
+node_definition_response_error: "response_error" "=" ldf_identifier ";"
+node_definition_fault_state_signals: "fault_state_signals" "=" ldf_identifier ("," ldf_identifier)* ";"
+node_definition_p2_min: "P2_min" "=" ldf_float "ms" ";"
+node_definition_st_min: "ST_min" "=" ldf_float "ms" ";"
+node_definition_n_as_timeout: "N_As_timeout" "=" ldf_float "ms" ";"
+node_definition_n_cr_timeout: "N_Cr_timeout" "=" ldf_float "ms" ";"
+node_definition_configurable_frames: node_definition_configurable_frames_20 | node_definition_configurable_frames_21
+node_definition_configurable_frames_20: "configurable_frames" "{" (ldf_identifier "=" ldf_integer ";")+ "}"
+node_definition_configurable_frames_21: "configurable_frames" "{" (ldf_identifier ";")+ "}"
+node_definition_response_tolerance: "response_tolerance" "=" ldf_float "%" ";"
+node_definition_wakeup_time: "wakeup_time" "=" ldf_float "ms" ";"
+node_definition_poweron_time: "poweron_time" "=" ldf_float "ms" ";"
+
+// LIN 2.1 Specification, section 9.2.5
+schedule_tables: "Schedule_tables" "{" (schedule_table_definition+) "}" 
+schedule_table_definition: ldf_identifier "{" (schedule_table_entry+) "}"
+schedule_table_entry: schedule_table_command "delay" ldf_float "ms" ";"
+schedule_table_command: schedule_table_command_masterreq | schedule_table_command_slaveresp | schedule_table_command_assignnad | schedule_table_command_conditionalchangenad  | schedule_table_command_datadump | schedule_table_command_saveconfiguration | schedule_table_command_assignframeidrange | schedule_table_command_assignframeid | schedule_table_command_unassignframeid | schedule_table_command_freeformat | schedule_table_command_frame
+schedule_table_command_masterreq: "MasterReq"
+schedule_table_command_slaveresp: "SlaveResp"
+schedule_table_command_assignnad: "AssignNAD" "{" ldf_identifier "}"
+schedule_table_command_conditionalchangenad: "ConditionalChangeNAD" "{" ldf_integer "," ldf_integer "," ldf_integer "," ldf_integer "," ldf_integer "," ldf_integer "}"
+schedule_table_command_datadump: "DataDump" "{" ldf_identifier "," ldf_integer "," ldf_integer "," ldf_integer "," ldf_integer "," ldf_integer "}"
+schedule_table_command_saveconfiguration: "SaveConfiguration" "{" ldf_identifier "}"
+schedule_table_command_assignframeidrange: "AssignFrameIdRange" "{" ldf_identifier "," ldf_integer ("," ldf_integer "," ldf_integer "," ldf_integer "," ldf_integer )? "}"
+schedule_table_command_assignframeid: "AssignFrameId" "{" ldf_identifier "," ldf_identifier "}"
+schedule_table_command_unassignframeid: "UnassignFrameId" "{" ldf_identifier "," ldf_identifier "}"
+schedule_table_command_freeformat: "FreeFormat" "{" ldf_integer "," ldf_integer "," ldf_integer "," ldf_integer "," ldf_integer "," ldf_integer "," ldf_integer "," ldf_integer "}"
+schedule_table_command_frame: ldf_identifier
+
+// LIN 2.1 Specification, section 9.2.3.3
+signal_groups: "Signal_groups" "{" (signal_group+) "}"
+signal_group: ldf_identifier ":" ldf_integer "{" (ldf_identifier "," ldf_integer ";")+ "}"
+
+// LIN 2.1 Specification, section 9.2.6.1
+signal_encoding_types: "Signal_encoding_types" "{" (signal_encoding_type+) "}" 
+signal_encoding_type: ldf_identifier "{" (signal_encoding_logical_value | signal_encoding_physical_value | signal_encoding_bcd_value | signal_encoding_ascii_value)* "}"
+signal_encoding_logical_value: "logical_value" "," ldf_integer ("," signal_encoding_text_value)? ";"
+signal_encoding_physical_value: "physical_value" "," ldf_integer "," ldf_integer "," ldf_float "," ldf_float ("," signal_encoding_text_value)? ";"
+signal_encoding_bcd_value: "bcd_value" ";"
+signal_encoding_ascii_value: "ascii_value" ";"
+signal_encoding_text_value: ESCAPED_STRING
+
+// LIN 2.1 Specification, section 9.2.6.2
+signal_representations: "Signal_representation" "{" (signal_representation_node+) "}" 
+signal_representation_node: ldf_identifier ":" ldf_identifier ("," ldf_identifier)* ";"
+
+C_INT: ("0x"HEXDIGIT+) | ("-"? INT) 
+C_FLOAT: ("-"? INT ("." INT)?) (("e" | "E")("+" | "-")? INT)?
+LIN_VERSION: INT "." INT
+ISO_VERSION: "ISO17987" ":" INT
+J2602_VERSION: "J2602" "_" INT "_" INT "." INT
+
+ANY_SEMICOLON_TERMINATED_LINE: /.*;/
+
+// Use common.CPP_COMMENT and common.C_COMMENT once lark-parser v0.10.2 is released
+CPP_COMMENT: /\/\/[^\n]*/
+C_COMMENT: "/*" /.*?/s "*/"
+
+%ignore CPP_COMMENT
+%ignore C_COMMENT
+%ignore WS
+%ignore WS_INLINE
+
+%import common._STRING_INNER
+%import common.HEXDIGIT 
+%import common.INT
+%import common.WORD
+%import common.CNAME
+%import common.ESCAPED_STRING
+%import common.SIGNED_NUMBER
+%import common.WS
+%import common.WS_INLINE

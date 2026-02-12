@@ -1,0 +1,93 @@
+{
+  "name": "vscode-ldf-explorer",
+  "displayName": "LDF Explorer",
+  "version": "0.1.0",
+  "description": "VS Code extension for exploring and editing LIN Description Files (LDF)",
+  "main": "./dist/extension.js",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "Visualization"
+  ],
+  "keywords": [
+    "LDF",
+    "LIN",
+    "automotive",
+    "embedded"
+  ],
+  "activationEvents": [
+    "onCommand:ldfExplorer.openLdf",
+    "onLanguage:ldf"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "ldfExplorer.openLdf",
+        "title": "Open in LDF Explorer",
+        "category": "LDF Explorer",
+        "icon": "$(open-preview)"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "ldfExplorer.openLdf",
+          "when": "resourceExtname == .ldf"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "ldfExplorer.openLdf",
+          "when": "resourceExtname == .ldf",
+          "group": "navigation"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "ldfExplorer.openLdf",
+          "when": "resourceExtname == .ldf",
+          "group": "navigation"
+        }
+      ]
+    },
+    "languages": [
+      {
+        "id": "ldf",
+        "aliases": [
+          "LIN Description File",
+          "LDF"
+        ],
+        "extensions": [
+          ".ldf"
+        ]
+      }
+    ],
+    "configuration": {
+      "title": "LDF Explorer",
+      "properties": {
+        "ldfExplorer.pythonPath": {
+          "type": "string",
+          "default": "python",
+          "description": "Python executable path for running ldfparser"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -w -p ./",
+    "lint": "echo \"No lint configured\"",
+    "test": "echo \"No tests yet\""
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^24.9.1",
+    "@types/vscode": "^1.105.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {}
+}
