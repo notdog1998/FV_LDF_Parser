@@ -1,0 +1,4 @@
+node_modules/
+python/ldfparser/__pycache__/
+dist/
+media/
