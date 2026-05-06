@@ -4,6 +4,9 @@
   "version": "0.1.0",
   "description": "VS Code extension for exploring and editing LIN Description Files (LDF)",
   "main": "./dist/extension.js",
+  "bin": {
+    "ldf-explorer": "./dist/cli/index.js"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },

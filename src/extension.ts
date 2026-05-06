@@ -122,6 +122,8 @@ async function openLdfDocument(context: vscode.ExtensionContext, uri: vscode.Uri
 /** Builds the payload sent back to WebView on every successful response. */
 function buildPayload(ldfService: LdfService): Record<string, unknown> {
   return {
+    overview: ldfService.getOverview(),
+    nodes: ldfService.getNodes(),
     signals: ldfService.signalService.list(),
     frames: ldfService.frameService.list(),
   };

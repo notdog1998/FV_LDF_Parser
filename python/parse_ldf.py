@@ -17,6 +17,68 @@ def ensure_ldfparser_on_path() -> None:
         sys.path.insert(0, str(ldfparser_dir))
 
 
+def _serialize_overview(ldf) -> Dict:
+    """Serialize header-level metadata for the WebView overview tab.
+
+    The checksum model isn't stored on the LDF object; per LIN spec, classic checksum is used
+    only for protocol version 1.x and enhanced for 2.x and later, so we derive it here.
+    """
+    protocol_version = ldf.get_protocol_version()
+    language_version = ldf.get_language_version()
+    checksum_model = None
+    if protocol_version is not None:
+        try:
+            major = getattr(protocol_version, "major", None)
+            checksum_model = "classic" if major is not None and major < 2 else "enhanced"
+        except Exception:
+            checksum_model = None
+
+    overview: Dict[str, Any] = {
+        "protocol_version": str(protocol_version) if protocol_version is not None else "",
+        "language_version": str(language_version) if language_version is not None else "",
+        "baudrate": int(ldf.get_baudrate()) if ldf.get_baudrate() is not None else 0,
+    }
+    channel = ldf.get_channel()
+    if channel:
+        overview["channel"] = channel
+    if checksum_model is not None:
+        overview["checksum_model"] = checksum_model
+    return overview
+
+
+def _serialize_product_id(product_id) -> Dict:
+    return {
+        "supplier_id": product_id.supplier_id,
+        "function_id": product_id.function_id,
+        "variant": product_id.variant,
+    }
+
+
+def _serialize_nodes(ldf) -> Dict:
+    """Serialize master + slave nodes (FR-02 节点视图)."""
+    master = ldf.get_master()
+    master_payload = None
+    if master is not None:
+        master_payload = {
+            "name": master.name,
+            "timebase": master.timebase,
+            "jitter": master.jitter,
+        }
+
+    slaves_payload: List[Dict] = []
+    for slave in ldf.get_slaves():
+        entry: Dict[str, Any] = {"name": slave.name}
+        if slave.product_id is not None:
+            entry["product_id"] = _serialize_product_id(slave.product_id)
+        if slave.configured_nad is not None:
+            entry["configured_nad"] = slave.configured_nad
+        if slave.initial_nad is not None:
+            entry["initial_nad"] = slave.initial_nad
+        slaves_payload.append(entry)
+
+    return {"master": master_payload, "slaves": slaves_payload}
+
+
 def _serialize_signals(ldf) -> List[Dict]:
     """Serialize LIN signals to dictionaries using native ldfparser APIs."""
     return [
@@ -55,6 +117,8 @@ def parse_ldf(path: Path) -> dict:
 
     ldf = ldfparser.parse_ldf(path=str(path))
     return {
+        "overview": _serialize_overview(ldf),
+        "nodes": _serialize_nodes(ldf),
         "signals": _serialize_signals(ldf),
         "frames": _serialize_frames(ldf),
     }

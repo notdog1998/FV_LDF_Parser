@@ -16,6 +16,40 @@ export interface LdfFrame {
   signals: Array<{ signal: string; offset: number }>;
 }
 
+/** Header-level metadata shown on the WebView "概览" tab (FR-02). */
+export interface LdfOverview {
+  protocol_version: string;
+  language_version: string;
+  baudrate: number;
+  channel?: string;
+  // ldfparser does not store the checksum model; it is derived from protocol version per LIN spec.
+  checksum_model?: 'classic' | 'enhanced';
+}
+
+export interface LdfProductId {
+  supplier_id: number;
+  function_id: number;
+  variant: number;
+}
+
+export interface LdfMaster {
+  name: string;
+  timebase: number;
+  jitter: number;
+}
+
+export interface LdfSlave {
+  name: string;
+  product_id?: LdfProductId;
+  configured_nad?: number;
+  initial_nad?: number;
+}
+
+export interface LdfNodes {
+  master?: LdfMaster;
+  slaves: LdfSlave[];
+}
+
 /** Change descriptor used by WebView ↔ Extension ↔ Python pipeline.
  *  _action tells Python bridge whether to create, update or delete the entity.
  */
