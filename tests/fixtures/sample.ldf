@@ -1,0 +1,26 @@
+LIN_description_file;
+LIN_protocol_version = "2.1";
+LIN_language_version = "2.1";
+LIN_speed = 19.2 kbps;
+
+Nodes {
+  Master: MasterNode, 5 ms, 0.1 ms;
+  Slaves: Slave1, Slave2;
+}
+
+Signals {
+  EngineSpeed: 8, 0, MasterNode, Slave1;
+  VehicleSpeed: 16, 100, Slave1, MasterNode;
+  DoorStatus: 1, 0, Slave1, MasterNode;
+  EngineTemp: 8, 0, MasterNode, Slave1;
+}
+
+Frames {
+  EngineFrame: 10, MasterNode, 8 {
+    EngineSpeed, 0;
+    EngineTemp, 8;
+  }
+  BodyFrame: 20, Slave1, 4 {
+    DoorStatus, 0;
+  }
+}

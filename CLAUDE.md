@@ -34,6 +34,10 @@ Service Layer spawns Python bridge.
 
 Extension Host is a proxy between WebView and Service Layer — it forwards postMessage calls to Service Layer methods and returns results. No HTTP.
 
+## Important info
+
+Source code pf ldf python lib in ../ldfparser, you can find out how to use this lib in this path. If you need to kown how to use ldf python lib, read ../ldfparser/README.md.
+
 ## Communication
 
 ### WebView ↔ Extension (postMessage)
@@ -75,6 +79,19 @@ interface LdfChange<T> {
 
 - `tsconfig.json`: `target: ES2020`, `module: commonjs`, `outDir: dist`, `rootDir: src`, `strict: true`
 - Extension entry: `dist/extension.js` (configured in `package.json` `"main"`)
+
+## Code Style
+
+### Comments
+
+- **No WHAT comments.** Code must explain itself via naming.
+- **Write WHY comments** for non-obvious constraints, invariants, or design decisions that would surprise a reader.
+- **Keep it to one line.** No multi-line docstrings or paragraph blocks.
+- **Examples of good comments:**
+  - `// Uses Math.pow instead of bit-shift to avoid overflow at width === 64`
+  - `// Error handling order matters: Python may emit { status: 'error' } even with exit code 1`
+  - `// Cache is already the correct state (Strategy C); no re-parse needed`
+  - `// Extension acts as a pure proxy (no business logic)`
 
 ## Constraints
 

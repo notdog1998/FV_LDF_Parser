@@ -70,7 +70,7 @@
         "ldfExplorer.pythonPath": {
           "type": "string",
           "default": "python",
-          "description": "Python executable path for running ldfparser"
+          "description": "Python executable path for running ldfparser. Only used when the bundled bridge executable is not available."
         }
       }
     }
@@ -80,14 +80,19 @@
     "compile": "tsc -p ./",
     "watch": "tsc -w -p ./",
     "lint": "echo \"No lint configured\"",
-    "test": "echo \"No tests yet\""
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "build:bridge": "cd python && pyinstaller --distpath ../bin build_exe.spec",
+    "build:bridge:clean": "cd python && pyinstaller --clean --distpath ../bin build_exe.spec"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@types/node": "^24.9.1",
+    "@types/node": "^24.12.2",
     "@types/vscode": "^1.105.0",
-    "typescript": "^5.9.3"
-  },
-  "dependencies": {}
+    "@vitest/coverage-v8": "^4.1.5",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.5"
+  }
 }

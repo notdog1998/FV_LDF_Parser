@@ -5,3 +5,9 @@ tsconfig.json
 **/*.map
 node_modules/@types/**
 node_modules/vscode/**
+
+# Python source no longer needed at runtime (bundled into exe)
+python/**
+
+# Keep the pre-built Windows bridge
+!bin/ldfparser-bridge.exe
