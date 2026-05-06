@@ -79,9 +79,11 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "npm run build",
     "compile": "tsc -p ./",
     "watch": "tsc -w -p ./",
+    "build:webview": "cd webview && npm run build",
+    "build": "npm run compile && npm run build:webview",
     "lint": "echo \"No lint configured\"",
     "test": "vitest run",
     "test:watch": "vitest",
