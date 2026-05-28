@@ -23,6 +23,7 @@ export default defineConfig({
     outDir: '../dist/webview',
     emptyOutDir: true,
     target: 'es2020',
+    sourcemap: 'inline',
   },
   test: {
     globals: true,

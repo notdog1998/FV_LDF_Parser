@@ -39,10 +39,19 @@ function getApi(): VsCodeApi | null {
   return null;
 }
 
-/** 向 Extension Host 发送消息;在非 WebView 环境会被静默忽略以便测试。 */
+/** 向 Extension Host 发送消息;在非 WebView 环境会被静默忽略以便测试。
+ *
+ * WHY 深拷贝:
+ * Pinia store 中的数组/对象被 Vue 3 包装成深层 Proxy。即使浅拷贝({...obj}),
+ * 嵌套属性(如 subscribers、frame.signals)仍是 Proxy,直接传给 postMessage
+ * 会触发 DataCloneError。因此发送前通过 JSON 序列化做一次深克隆,
+ * 确保 MessagePort 收到的是纯 JS 对象。(PRD §9.2)
+ */
 export function postMessage(message: OutboundMessage): void {
   const api = getApi();
-  api?.postMessage(message);
+  if (api) {
+    api.postMessage(JSON.parse(JSON.stringify(message)));
+  }
 }
 
 /**
