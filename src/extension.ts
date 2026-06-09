@@ -138,20 +138,45 @@ function getWebviewContent(webview: vscode.Webview, extensionPath: string): stri
     let html = fs.readFileSync(indexPath, 'utf-8');
     // Rewrite relative asset URLs to use webview.asWebviewUri
     const baseUri = webview.asWebviewUri(vscode.Uri.file(webviewDir)).toString();
+
+    // Remove crossorigin attribute to avoid CORS issues in VS Code WebView
+    html = html.replace(/ crossorigin(?:="")?/g, '');
+
     html = html.replace(/(src|href)="\.\//g, `$1="${baseUri}/`);
+
+    // Inject CSP with nonce for all scripts (VS Code WebView security requirement)
+    const nonce = getNonce();
+    const csp = `default-src 'none'; script-src 'nonce-${nonce}' ${webview.cspSource} 'unsafe-eval'; style-src ${webview.cspSource} 'unsafe-inline'; img-src ${webview.cspSource} https:; font-src ${webview.cspSource};`;
+    html = html.replace('<head>', `<head>\n    <meta http-equiv="Content-Security-Policy" content="${csp}">`);
+
+    // Add nonce to all script tags
+    html = html.replace(/<script/g, `<script nonce="${nonce}"`);
+
     return html;
   }
 
   // Placeholder until Vue build is ready
-  return placeholderHtml();
+  return placeholderHtml(webview);
 }
 
-function placeholderHtml(): string {
+/** Generate a random nonce for CSP script-src whitelisting. */
+function getNonce(): string {
+  let text = '';
+  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  for (let i = 0; i < 32; i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
+  return text;
+}
+
+function placeholderHtml(webview: vscode.Webview): string {
+  const nonce = getNonce();
+  const csp = `default-src 'none'; script-src 'nonce-${nonce}' ${webview.cspSource} 'unsafe-eval'; style-src ${webview.cspSource} 'unsafe-inline';`;
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-eval' 'unsafe-inline'; style-src 'unsafe-inline';">
+  <meta http-equiv="Content-Security-Policy" content="${csp}">
   <title>LDF Explorer</title>
   <style>
     body { font-family: system-ui, sans-serif; padding: 2rem; color: #333; }
@@ -163,7 +188,7 @@ function placeholderHtml(): string {
   <h1>LDF Explorer</h1>
   <p>WebView content will be loaded here when the Vue build is ready.</p>
   <div class="status" id="status">Waiting for Extension...</div>
-  <script>
+  <script nonce="${nonce}">
     const vscode = acquireVsCodeApi();
     vscode.postMessage({ type: 'ready' });
     window.addEventListener('message', (event) => {
