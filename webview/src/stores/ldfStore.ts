@@ -31,6 +31,7 @@ import type {
   LdfSignal,
 } from '@/types/ldf';
 import {
+  checkSignalOverlap,
   validateFrame,
   validateMapping,
   validateSignal,
@@ -337,6 +338,10 @@ export const useLdfStore = defineStore('ldf', () => {
       ...frame,
       signals: [...frame.signals, { signal: signalName, offset }],
     };
+    const overlap = checkSignalOverlap(updated, signals.value);
+    if (overlap) {
+      throw new Error(overlap);
+    }
     applyFrameUpdate(frameName, updated);
   }
 
@@ -375,6 +380,10 @@ export const useLdfStore = defineStore('ldf', () => {
         m.signal === signalName ? { signal: signalName, offset } : m
       ),
     };
+    const overlap = checkSignalOverlap(updated, signals.value);
+    if (overlap) {
+      throw new Error(overlap);
+    }
     applyFrameUpdate(frameName, updated);
   }
 

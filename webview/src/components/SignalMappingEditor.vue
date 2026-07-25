@@ -14,7 +14,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import type { LdfFrame, LdfSignal } from '@/types/ldf';
-import { validateMapping } from '@/utils/validators';
+import { checkSignalOverlap, validateMapping } from '@/utils/validators';
 
 interface Props {
   frame: LdfFrame;
@@ -55,6 +55,15 @@ function onAdd() {
     newError.value = err;
     return;
   }
+  const addFrame: LdfFrame = {
+    ...frame,
+    signals: [...frame.signals, { signal: sig.name, offset: newOffset.value }],
+  };
+  const overlap = checkSignalOverlap(addFrame, signals);
+  if (overlap) {
+    newError.value = overlap;
+    return;
+  }
   newError.value = null;
   emit('addMapping', sig.name, newOffset.value);
   selectedSignal.value = '';
@@ -73,6 +82,17 @@ function onSaveOffset(signalName: string) {
   const err = validateMapping(sig.width, editOffset.value, frame.length);
   if (err) {
     editError.value = err;
+    return;
+  }
+  const updateFrame: LdfFrame = {
+    ...frame,
+    signals: frame.signals.map((m) =>
+      m.signal === signalName ? { signal: signalName, offset: editOffset.value } : m
+    ),
+  };
+  const overlap = checkSignalOverlap(updateFrame, signals);
+  if (overlap) {
+    editError.value = overlap;
     return;
   }
   editError.value = null;

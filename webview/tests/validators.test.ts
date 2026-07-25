@@ -12,6 +12,7 @@ import {
   validateFrame,
   validateMapping,
   computeMaxInitValue,
+  checkSignalOverlap,
 } from '@/utils/validators';
 import type { LdfFrame, LdfSignal } from '@/types/ldf';
 
@@ -171,5 +172,49 @@ describe('validateMapping', () => {
 
   it('刚好越过 1 bit 报错', () => {
     expect(validateMapping(2, 31, 4)).toMatch(/exceed|capacity|frame/i);
+  });
+});
+
+describe('checkSignalOverlap', () => {
+  const signals: LdfSignal[] = [
+    { name: 'SigA', width: 8, init_value: 0 },
+    { name: 'SigB', width: 8, init_value: 0 },
+    { name: 'SigC', width: 3, init_value: 0 },
+  ];
+
+  function frameWith(mappings: Array<{ signal: string; offset: number }>): LdfFrame {
+    return { ...baseFrame, signals: mappings };
+  }
+
+  it('无重叠返回 null', () => {
+    const frame = frameWith([
+      { signal: 'SigA', offset: 0 },
+      { signal: 'SigB', offset: 8 },
+    ]);
+    expect(checkSignalOverlap(frame, signals)).toBeNull();
+  });
+
+  it('部分重叠返回错误', () => {
+    const frame = frameWith([
+      { signal: 'SigA', offset: 0 },
+      { signal: 'SigB', offset: 4 },
+    ]);
+    expect(checkSignalOverlap(frame, signals)).toMatch(/overlap/i);
+  });
+
+  it('紧邻不重叠（end+1 == start）', () => {
+    const frame = frameWith([
+      { signal: 'SigC', offset: 0 }, // 0-2
+      { signal: 'SigA', offset: 3 }, // 3-10
+    ]);
+    expect(checkSignalOverlap(frame, signals)).toBeNull();
+  });
+
+  it('找不到 signal 定义时按 width=1 处理', () => {
+    const frame = frameWith([
+      { signal: 'Unknown', offset: 0 },
+      { signal: 'Unknown2', offset: 0 },
+    ]);
+    expect(checkSignalOverlap(frame, signals)).toMatch(/overlap/i);
   });
 });

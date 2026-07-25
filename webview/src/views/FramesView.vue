@@ -10,8 +10,8 @@
 import { ref } from 'vue';
 import { useLdfStore } from '@/stores/ldfStore';
 import ChangeBadge from '@/components/ChangeBadge.vue';
+import FrameDetailTabs from '@/components/FrameDetailTabs.vue';
 import FrameForm from '@/components/FrameForm.vue';
-import SignalMappingEditor from '@/components/SignalMappingEditor.vue';
 import type { LdfFrame } from '@/types/ldf';
 
 const store = useLdfStore();
@@ -134,10 +134,10 @@ function onUpdateOffset(frameName: string, signalName: string, offset: number) {
             </template>
           </tr>
 
-          <!-- 展开行:信号映射编辑器 -->
+          <!-- 展开行:信号映射编辑器 / 可视化布局 -->
           <tr v-if="expandedFrame === frame.name" class="row--expand">
             <td colspan="7" class="cell--expand">
-              <SignalMappingEditor
+              <FrameDetailTabs
                 :frame="frame"
                 :signals="store.signals"
                 @add-mapping="(s, o) => onAddMapping(frame.name, s, o)"

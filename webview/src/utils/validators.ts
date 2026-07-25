@@ -84,3 +84,32 @@ export function validateMapping(
   }
   return null;
 }
+
+/**
+ * 校验 frame 内所有 signal 映射是否存在 bit 重叠。
+ * 返回 null 表示无重叠，否则返回描述冲突的消息。
+ */
+export function checkSignalOverlap(
+  frame: LdfFrame,
+  signals: LdfSignal[]
+): string | null {
+  const ranges = frame.signals.map((mapping) => {
+    const signal = signals.find((s) => s.name === mapping.signal);
+    const width = signal?.width ?? 1;
+    return {
+      signalName: mapping.signal,
+      startBit: mapping.offset,
+      endBit: mapping.offset + width - 1,
+    };
+  });
+  for (let i = 0; i < ranges.length; i++) {
+    for (let j = i + 1; j < ranges.length; j++) {
+      const a = ranges[i];
+      const b = ranges[j];
+      if (a.startBit <= b.endBit && b.startBit <= a.endBit) {
+        return `signal "${a.signalName}" overlaps with "${b.signalName}"`;
+      }
+    }
+  }
+  return null;
+}
