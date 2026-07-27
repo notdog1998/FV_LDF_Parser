@@ -5,6 +5,19 @@ tsconfig.json
 **/*.map
 node_modules/@types/**
 node_modules/vscode/**
+node_modules/.bin/**
+node_modules/*/test/**
+node_modules/*/tests/**
+node_modules/*/docs/**
+node_modules/*/examples/**
+node_modules/typescript/**
+node_modules/vitest/**
+node_modules/@vitest/**
+node_modules/c8/**
+node_modules/istanbul*/**
+
+# WebView dev dependencies (production build lives in dist/webview)
+webview/node_modules/**
 
 # Python source no longer needed at runtime (bundled into exe)
 python/**
