@@ -139,6 +139,30 @@ vscode-ldf-explorer/
     └── package.json
 ```
 
+## Publishing
+
+Maintainers can publish a new release by following these steps:
+
+1. **Update the version number** in `package.json` following [Semantic Versioning](https://semver.org/).
+2. **Synchronize the release branch** with `main`:
+   ```bash
+   git checkout release
+   git merge main
+   git push origin release
+   ```
+3. **Tag and push the release**:
+   ```bash
+   git tag v$(node -p "require('./package.json').version")
+   git push origin tag v$(node -p "require('./package.json').version")
+   ```
+4. The [Release workflow](.github/workflows/release.yml) will automatically build the extension, package it as `fv-ldf-explorer.vsix`, create a GitHub Release, and attach the asset.
+
+Users can install the latest release by downloading `fv-ldf-explorer.vsix` from the [Releases page](https://github.com/notdog1998/FV_LDF_Parser/releases) and running `Install from VSIX...` in VS Code.
+
+## Automatic Updates
+
+The extension can check for updates automatically. To disable automatic checks, set `ldfExplorer.autoCheckUpdate` to `false`. To check manually, run the command `LDF Explorer: Check for Updates` from the command palette.
+
 ## License
 
 ISC
