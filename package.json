@@ -1,7 +1,7 @@
 {
   "name": "vscode-ldf-explorer",
   "displayName": "LDF Explorer",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "VS Code extension for exploring and editing LIN Description Files (LDF)",
   "main": "./dist/extension.js",
   "bin": {
