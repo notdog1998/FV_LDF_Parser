@@ -95,9 +95,13 @@
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^24.12.2",
+    "@types/semver": "^7.7.1",
     "@types/vscode": "^1.105.0",
     "@vitest/coverage-v8": "^4.1.5",
     "typescript": "^5.9.3",
     "vitest": "^4.1.5"
+  },
+  "dependencies": {
+    "semver": "^7.8.5"
   }
 }
