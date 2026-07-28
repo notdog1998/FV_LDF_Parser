@@ -2,8 +2,6 @@ name: Release
 
 on:
   push:
-    branches:
-      - release
     tags:
       - 'v*.*.*'
 
@@ -16,6 +14,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify tag is on release branch
+        shell: bash
+        run: |
+          git fetch origin release
+          if ! git merge-base --is-ancestor HEAD origin/release; then
+            echo "Tag must be pushed to the release branch"
+            exit 1
+          fi
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
