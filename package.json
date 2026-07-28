@@ -31,6 +31,11 @@
         "title": "Open in LDF Explorer",
         "category": "LDF Explorer",
         "icon": "$(open-preview)"
+      },
+      {
+        "command": "ldfExplorer.checkUpdate",
+        "title": "Check for Updates",
+        "category": "LDF Explorer"
       }
     ],
     "menus": {
@@ -38,6 +43,10 @@
         {
           "command": "ldfExplorer.openLdf",
           "when": "resourceExtname == .ldf"
+        },
+        {
+          "command": "ldfExplorer.checkUpdate",
+          "when": "true"
         }
       ],
       "editor/title": [
@@ -74,6 +83,16 @@
           "type": "string",
           "default": "python",
           "description": "Python executable path for running ldfparser. Only used when the bundled bridge executable is not available."
+        },
+        "ldfExplorer.autoCheckUpdate": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically check for updates when the extension activates."
+        },
+        "ldfExplorer.githubToken": {
+          "type": "string",
+          "default": "",
+          "description": "GitHub Personal Access Token for accessing private release repositories. Not required for public repositories."
         }
       }
     }
@@ -93,6 +112,10 @@
   },
   "author": "",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/notdog1998/FV_LDF_Parser.git"
+  },
   "devDependencies": {
     "@types/node": "^24.12.2",
     "@types/semver": "^7.7.1",
