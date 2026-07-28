@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { PythonBridge } from './service/pythonBridge';
 import { LdfService } from './service/ldfService';
+import { checkUpdate } from './updater';
 
 /** Tracks open WebView panels keyed by LDF file path to prevent duplicate panels. */
 const openPanels = new Map<string, vscode.WebviewPanel>();
@@ -11,6 +12,15 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     vscode.commands.registerCommand('ldfExplorer.openLdf', (uri: vscode.Uri) =>
       openLdfDocument(context, uri)
+    )
+  );
+
+  // Kick off update check without blocking activation.
+  checkUpdate(context, { silent: true }).catch(() => undefined);
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('ldfExplorer.checkUpdate', () =>
+      checkUpdate(context, { silent: false })
     )
   );
 }
